@@ -1,0 +1,221 @@
+{% extends 'core/base.html' %}
+{% block content %}
+<div class="chat-container d-flex flex-column vh-100 p-4">
+
+    <div class="d-flex align-items-center mb-4 px-3">
+        <div class="status-dot bg-success me-2 animate-pulse"></div>
+        <h5 class="m-0 fw-bold text-uppercase tracking-tighter text-white">AI Link Active</h5>
+    </div>
+
+    <div id="chat-window" class="flex-grow-1 overflow-auto px-3 mb-4" style="scrollbar-width: none;">
+        <div class="ai-msg mb-4">
+            <div class="msg-bubble shadow-sm">
+                System Initialized. Accessing local knowledge base and Gemini 1.5 Flash.
+                How can I assist with your botanical research?
+            </div>
+        </div>
+    </div>
+
+    <div id="image-preview-container" class="px-3 mb-2 d-none">
+        <div class="position-relative d-inline-block">
+            <img id="image-preview" src="" class="rounded-3 border border-success" style="height: 80px;">
+            <button onclick="clearImage()"
+                class="btn btn-danger btn-sm position-absolute top-0 start-100 translate-middle rounded-circle"
+                style="padding: 2px 6px;">&times;</button>
+        </div>
+    </div>
+
+    <form id="chat-form" class="chat-controls-container mx-auto w-100 mb-4 px-3" style="max-width: 800px;">
+        <div class="upload-bar d-flex align-items-center p-2 mb-2 rounded-3 border border-secondary"
+            style="background: #1a1a20;">
+            <label for="image-upload" class="btn btn-dark border-secondary px-3 py-1 small me-3">
+                <i class="bi bi-upload me-2"></i>Upload
+                <input type="file" id="image-upload" hidden accept="image/*">
+            </label>
+            <span id="file-status" class="text-secondary small font-monospace">200MB per file • JPG, PNG, JPEG</span>
+        </div>
+
+        <div class="chat-bar d-flex align-items-center p-2 rounded-3 border border-secondary"
+            style="background: #1a1a20;">
+            <input type="text" id="user-input" class="form-control bg-transparent border-0 text-white shadow-none ps-3"
+                placeholder="Ask about a herb..." style="font-size: 0.95rem;">
+
+            <button type="submit" id="submit-chat"
+                class="btn btn-secondary border-0 rounded-3 px-2 py-1 ms-2 opacity-50" disabled>
+                <i class="bi bi-arrow-up-short fs-4"></i>
+            </button>
+        </div>
+    </form>
+</div>
+
+<style>
+    .msg-bubble {
+        background: #1a1a1a;
+        border: 1px solid #333;
+        padding: 12px 18px;
+        border-radius: 18px;
+        display: inline-block;
+        max-width: 80%;
+        color: #ddd;
+    }
+
+    .user-msg {
+        text-align: right;
+        margin-bottom: 1rem;
+    }
+
+    .user-msg .msg-bubble {
+        background: #14532d;
+        border-color: #22c55e;
+        color: white;
+    }
+
+    .animate-pulse {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+
+        0%,
+        100% {
+            opacity: 1;
+        }
+
+        50% {
+            opacity: 0.3;
+        }
+    }
+
+    .chat-bar:focus-within {
+        border-color: #22c55e !important;
+    }
+
+    #submit-chat.active {
+        background: #22c55e !important;
+        opacity: 1 !important;
+        color: black !important;
+    }
+
+    #chat-window::-webkit-scrollbar {
+        display: none;
+    }
+</style>
+
+<script>
+    const chatForm = document.getElementById('chat-form');
+    const imageUpload = document.getElementById('image-upload');
+    const chatWindow = document.getElementById('chat-window');
+    const userInput = document.getElementById('user-input');
+    const submitBtn = document.getElementById('submit-chat');
+    const fileStatus = document.getElementById('file-status');
+
+    function appendMessage(text, isUser = false) {
+        const div = document.createElement('div');
+        div.className = isUser ? 'user-msg mb-3' : 'ai-msg mb-3';
+        div.innerHTML = `<div class="msg-bubble">${text}</div>`;
+        chatWindow.appendChild(div);
+        chatWindow.scrollTop = chatWindow.scrollHeight;
+    }
+
+    function clearImage() {
+        imageUpload.value = '';
+        document.getElementById('image-preview-container').classList.add('d-none');
+        fileStatus.innerText = "200MB per file • JPG, PNG, JPEG";
+        fileStatus.classList.replace('text-success', 'text-secondary');
+    }
+
+    // Handle Auto-Analyze from Dashboard
+    window.onload = () => {
+        {% if auto_analyze %}
+        setTimeout(() => {
+            appendMessage("Analyzing scan data for: **{{ auto_analyze.name }}**...", false);
+            setTimeout(() => {
+                appendMessage("AI identification complete. Confidence: {{ auto_analyze.confidence }}%. How would you like to proceed with this specimen?", false);
+            }, 1000);
+        }, 500);
+        {% endif %}
+    };
+
+    userInput.addEventListener('input', () => {
+        if (userInput.value.trim().length > 0 || imageUpload.files.length > 0) {
+            submitBtn.disabled = false;
+            submitBtn.classList.add('active');
+        } else {
+            submitBtn.disabled = true;
+            submitBtn.classList.remove('active');
+        }
+    });
+
+    imageUpload.onchange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            document.getElementById('image-preview').src = URL.createObjectURL(file);
+            document.getElementById('image-preview-container').classList.remove('d-none');
+            fileStatus.innerText = `READY: ${file.name}`;
+            fileStatus.classList.replace('text-secondary', 'text-success');
+            submitBtn.disabled = false;
+            submitBtn.classList.add('active');
+        }
+    };
+
+    let lastRequestTime = 0;
+    const REQUEST_COOLDOWN = 3000; // 3 seconds between requests
+
+    chatForm.onsubmit = async (e) => {
+        e.preventDefault();
+        const msg = userInput.value;
+        const file = imageUpload.files[0];
+        if (!msg && !file) return;
+
+        // Rate limiting check
+        const now = Date.now();
+        if (now - lastRequestTime < REQUEST_COOLDOWN) {
+            appendMessage("⏱️ Please wait a moment before sending another message.", false);
+            return;
+        }
+        lastRequestTime = now;
+
+        if (msg) appendMessage(msg, true);
+        userInput.value = '';
+        submitBtn.classList.remove('active');
+        submitBtn.disabled = true;
+
+        const loadingDiv = document.createElement('div');
+        loadingDiv.innerHTML = `<div class="ai-msg mb-3"><div class="msg-bubble opacity-50 small">Processing AI Link...</div></div>`;
+        chatWindow.appendChild(loadingDiv);
+        chatWindow.scrollTop = chatWindow.scrollHeight;
+
+        const formData = new FormData();
+        formData.append('message', msg);
+        if (file) formData.append('image', file);
+
+        try {
+            const response = await fetch("{% url 'send_message' %}", {
+                method: 'POST',
+                body: formData
+            });
+            const result = await response.json();
+            loadingDiv.remove();
+
+            if (result.success) {
+                appendMessage(result.response);
+                clearImage();
+            } else {
+                const errorMsg = result.error || "Unable to process request";
+                if (errorMsg.includes('quota')) {
+                    appendMessage("⚠️ Service quota limit reached. Our AI service has reached its daily limit. Please try again later or use the local knowledge base.");
+                } else {
+                    appendMessage("❌ " + errorMsg);
+                }
+            }
+        } catch (err) {
+            loadingDiv.remove();
+            appendMessage("⚠️ Connection timeout. Please try again.");
+        }
+        clearImage();
+    };
+</script>
+{% endblock %}

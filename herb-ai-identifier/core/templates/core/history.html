@@ -1,0 +1,137 @@
+{% extends 'core/base.html' %}
+{% block content %}
+<div class="main-scroll p-4">
+    <div class="d-flex justify-content-between align-items-end mb-5">
+        <div>
+            <h1 class="display-5 fw-bold text-uppercase tracking-tighter text-white">AI Scan History</h1>
+            <p class="text-secondary font-monospace m-0">// VERIFIED PLANT IDENTIFICATIONS</p>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        {% for log in history %}
+        <div class="col-md-4">
+            <div class="glass-card p-0 overflow-hidden"
+                onclick="window.location.href='{% url 'analyzer' %}?id={{ log.id }}'" style="cursor: pointer;">
+
+                <div class="position-relative" style="height: 150px; overflow: hidden; background: #111;">
+                    {% if log.user_image %}
+                    <img src="{{ log.user_image.url }}" class="w-100 h-100 object-fit-cover opacity-75">
+                    {% elif log.matched_image_url %}
+                    <img src="{{ log.matched_image_url }}" class="w-100 h-100 object-fit-cover opacity-75">
+                    {% else %}
+                    <div class="w-100 h-100 d-flex flex-column align-items-center justify-content-center text-secondary">
+                        <i class="bi bi-search display-4"></i>
+                        <span class="small mt-2">{{ log.reference_img }}</span>
+                    </div>
+                    {% endif %}
+                    <div class="position-absolute top-0 end-0 p-2">
+                        <span class="badge bg-success text-black fw-bold">{{ log.confidence }}% MATCH</span>
+                    </div>
+                </div>
+
+                <div class="p-3 border-top border-secondary">
+                    <h6 class="fw-bold text-uppercase text-white m-0">{{ log.common_name }}</h6>
+                    <p class="text-secondary small mb-2">{{ log.details|truncatechars:100 }}</p>
+                    <div class="d-flex justify-content-between align-items-center mt-2">
+                        <span class="small text-secondary font-monospace">{{ log.timestamp|date:"d.m.y" }}</span>
+                        <span class="badge bg-dark border border-secondary text-success">{{ log.reference_img }}</span>
+                    </div>
+                    <button type="button"
+                        class="btn btn-outline-success btn-sm w-100 mt-3"
+                        onclick="openHistoryPreview(this, event)"
+                        data-id="{{ log.id }}"
+                        data-name="{{ log.common_name|escapejs }}"
+                        data-scientific="{{ log.scientific_name|default:''|escapejs }}"
+                        data-score="{{ log.confidence }}"
+                        data-source="{{ log.reference_img|escapejs }}"
+                        data-details="{{ log.details|escapejs }}"
+                        data-image="{{ log.matched_image_url|default:'' }}">
+                        Preview Result
+                    </button>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12 text-center py-5 opacity-50">
+            <i class="bi bi-folder-x display-1"></i>
+            <p class="font-monospace mt-3">NO ARCHIVES RETRIEVED</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="modal fade" id="historyPreviewModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content bg-dark border-secondary text-white">
+            <div class="modal-header border-secondary">
+                <div>
+                    <h5 class="modal-title fw-bold" id="previewModalTitle">AI Scan Preview</h5>
+                    <p class="small text-secondary mb-0" id="previewModalSubtitle">Plant identification details</p>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="row g-4">
+                    <div class="col-md-5">
+                        <div class="preview-image h-100 rounded-4 overflow-hidden" style="background: #111; min-height: 280px;">
+                            <img id="previewImage" src="" alt="Plant reference" class="w-100 h-100 object-fit-cover d-none">
+                            <div id="previewImagePlaceholder" class="h-100 d-flex align-items-center justify-content-center text-secondary">
+                                <i class="bi bi-image fs-1"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-7">
+                        <div class="mb-4">
+                            <span class="badge bg-success" id="previewBadgeScore"></span>
+                            <span class="badge bg-dark border border-secondary ms-2" id="previewBadgeSource"></span>
+                        </div>
+                        <h4 class="fw-bold text-uppercase" id="previewPlantName"></h4>
+                        <p class="text-secondary mb-4" id="previewScientificName"></p>
+                        <div class="text-secondary" id="previewDetails" style="white-space: pre-wrap; line-height: 1.7;"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-secondary">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button id="previewAnalyzerButton" type="button" class="btn btn-success">Open in Analyzer</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function openHistoryPreview(button, event) {
+        event.stopPropagation();
+        const name = button.dataset.name || 'Unknown Plant';
+        const scientific = button.dataset.scientific || 'Scientific name unavailable';
+        const score = button.dataset.score || '0';
+        const source = button.dataset.source || 'AI LINK';
+        const details = button.dataset.details || 'No details available.';
+        const image = button.dataset.image || '';
+        const recordId = button.dataset.id;
+
+        document.getElementById('previewModalTitle').innerText = name;
+        document.getElementById('previewPlantName').innerText = name;
+        document.getElementById('previewScientificName').innerText = scientific;
+        document.getElementById('previewBadgeScore').innerText = score + '% MATCH';
+        document.getElementById('previewBadgeSource').innerText = source;
+        document.getElementById('previewDetails').innerText = details;
+
+        const previewImage = document.getElementById('previewImage');
+        const previewPlaceholder = document.getElementById('previewImagePlaceholder');
+        if (image) {
+            previewImage.src = image;
+            previewImage.classList.remove('d-none');
+            previewPlaceholder.classList.add('d-none');
+        } else {
+            previewImage.classList.add('d-none');
+            previewPlaceholder.classList.remove('d-none');
+        }
+
+        const analyzerButton = document.getElementById('previewAnalyzerButton');
+        analyzerButton.onclick = () => window.location.href = `{% url 'analyzer' %}?id=${recordId}`;
+    }
+</script>
+
+{% endblock %}

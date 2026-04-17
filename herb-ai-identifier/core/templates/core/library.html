@@ -1,0 +1,176 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="main-scroll p-4">
+    <div class="library-header d-flex justify-content-between align-items-end mb-5">
+        <div>
+            <h1 class="display-5 fw-bold text-uppercase tracking-tighter text-white">Herbarium Database</h1>
+            <p class="text-secondary font-monospace m-0">
+                // {{ specimens|length }} SPECIMENS LOGGED
+            </p>
+        </div>
+        <div class="status-indicator text-success small font-monospace d-none d-md-block">
+            <i class="bi bi-cpu-fill me-2 pulse"></i>VAULT_CONNECTED
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="glass-card h-100 d-flex flex-column align-items-center justify-content-center text-success py-5"
+                style="border: 2px dashed #22c55e; cursor: pointer; min-height: 250px;" data-bs-toggle="modal"
+                data-bs-target="#addSpecimenModal">
+                <i class="bi bi-plus-lg fs-1 mb-2"></i>
+                <span class="fw-bold text-uppercase">Add Specimen</span>
+                <div class="small opacity-50 font-monospace">Manual Vault Entry</div>
+            </div>
+        </div>
+
+        {% if specimens %}
+        {% for s in specimens %}
+        <div class="col-md-4">
+            <div class="glass-card p-0 overflow-hidden h-100"
+                onclick="window.location.href='{% url 'analyzer' %}?id={{ s.id }}'" style="cursor: pointer;">
+
+                <div class="specimen-img-container" style="height: 180px; overflow: hidden; position: relative;">
+                    {% if s.user_image %}
+                    <img src="{{ s.user_image.url }}" class="w-100 h-100 object-fit-cover transition-img">
+                    {% else %}
+                    <div class="w-100 h-100 d-flex align-items-center justify-content-center bg-dark text-secondary">
+                        <i class="bi bi-image fs-1"></i>
+                    </div>
+                    {% endif %}
+                    <div class="confidence-badge">{{ s.confidence }}% MATCH</div>
+                </div>
+
+                <div class="p-3 border-top border-secondary">
+                    <h5 class="fw-bold text-uppercase m-0 text-white">{{ s.common_name }}</h5>
+                    <p class="text-secondary small mb-2">{{ s.details|truncatechars:90 }}</p>
+                    <div class="d-flex justify-content-between align-items-center mt-2">
+                        <span class="small text-secondary font-monospace">{{ s.timestamp|date:"d.M.Y" }}</span>
+                        <span class="badge bg-dark border border-secondary text-success">{{ s.reference_img }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+        {% endif %}
+    </div>
+
+    {% if not specimens %}
+    <div class="text-center py-5 rounded-4 mt-4" style="background: rgba(255,255,255,0.03); border: 1px solid #333;">
+        <i class="bi bi-database-exclamation display-1 text-secondary opacity-25"></i>
+        <h3 class="mt-4 text-secondary font-monospace">[ DATABASE EMPTY ]</h3>
+        <p class="text-muted small">No scanned specimens detected in the local knowledge vault.</p>
+    </div>
+    {% endif %}
+</div>
+
+<div class="modal fade" id="addSpecimenModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content bg-dark border-secondary text-white"
+            style="border-radius: 24px; border: 1px solid #333;">
+            <div class="modal-header border-secondary">
+                <h5 class="modal-title fw-bold text-uppercase tracking-tighter">Manual Vault Entry</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+
+            <form action="{% url 'manual_add' %}" method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="modal-body p-4">
+                    <div class="mb-4">
+                        <label class="small opacity-50 font-monospace mb-2 text-uppercase">Herb Common Name</label>
+                        <input type="text" name="common_name"
+                            class="form-control bg-transparent border-secondary text-white py-2 shadow-none"
+                            placeholder="e.g. Ancient Peppermint" required>
+                    </div>
+
+                    <div class="mb-2">
+                        <label class="small opacity-50 font-monospace mb-2 text-uppercase">Plant Image Upload</label>
+                        <div class="upload-bar d-flex align-items-center p-2 rounded-3 border border-secondary"
+                            style="background: #1a1a20;">
+                            <input type="file" name="user_image"
+                                class="form-control form-control-sm bg-transparent border-0 text-white shadow-none"
+                                required>
+                        </div>
+                        <span class="text-secondary" style="font-size: 10px;">// JPG, PNG, WEBP ACCEPTED</span>
+                    </div>
+                </div>
+
+                <div class="modal-footer border-0 p-4 pt-0">
+                    <button type="submit" class="btn btn-success w-100 py-2 fw-bold text-uppercase shadow-sm">
+                        Commit to Herbarium
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    .glass-card {
+        background: #161616;
+        border: 1px solid #333;
+        border-radius: 20px;
+        transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .glass-card:hover {
+        border-color: #22c55e;
+        transform: translateY(-8px);
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.5);
+    }
+
+    .transition-img {
+        transition: transform 0.6s ease;
+    }
+
+    .glass-card:hover .transition-img {
+        transform: scale(1.1);
+    }
+
+    .confidence-badge {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: rgba(34, 197, 94, 0.95);
+        color: black;
+        padding: 4px 12px;
+        border-radius: 50px;
+        font-size: 10px;
+        font-weight: 800;
+        z-index: 2;
+    }
+
+    .pulse {
+        animation: pulse-animation 2s infinite;
+    }
+
+    @keyframes pulse-animation {
+
+        0%,
+        100% {
+            opacity: 1;
+        }
+
+        50% {
+            opacity: 0.3;
+        }
+    }
+
+    .tracking-tighter {
+        letter-spacing: -2px;
+    }
+
+    /* Ensuring the file input matches your theme */
+    input[type="file"]::file-selector-button {
+        background: #333;
+        color: white;
+        border: none;
+        padding: 5px 10px;
+        border-radius: 5px;
+        margin-right: 10px;
+        cursor: pointer;
+    }
+</style>
+{% endblock %}

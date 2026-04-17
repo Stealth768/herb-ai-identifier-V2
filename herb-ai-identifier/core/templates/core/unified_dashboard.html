@@ -1,0 +1,104 @@
+{% extends 'core/base.html' %}
+{% block content %}
+
+<div class="container-fluid py-4" style="max-width: 1100px;">
+
+    <div class="d-flex justify-content-between align-items-center mb-5">
+        <div class="search-wrapper flex-grow-1 me-4">
+            <form action="." method="GET" class="position-relative">
+                <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-secondary"></i>
+                <input type="text" name="q"
+                    class="form-control bg-dark border-secondary text-white ps-5 py-2 rounded-pill"
+                    placeholder="Search your knowledge base or ask AI..." value="{{ query }}">
+            </form>
+        </div>
+        <div class="user-profile d-flex align-items-center gap-3">
+            <span class="fw-bold d-none d-md-block">{{ user_name }}</span>
+            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed={{ user_name }}"
+                class="rounded-circle border border-success" width="40">
+        </div>
+    </div>
+
+    {% if query %}
+    <h4 class="text-uppercase small tracking-widest text-secondary mb-4">Search Results for "{{ query }}"</h4>
+    <div class="row g-3">
+        {% for result in search_results %}
+        <div class="col-md-4">
+            <div class="glass-card p-3">
+                <i class="bi bi-file-earmark-text text-success me-2"></i> {{ result }}
+                <div class="mt-2 small opacity-50">Stored in /knowledge_base</div>
+            </div>
+        </div>
+        {% empty %}
+        <p class="text-muted italic">No local matches. Try asking the AI Chat below.</p>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="welcome-section text-center mb-5">
+        <h1 class="display-5 fw-bold">Welcome, {{ user_name }}</h1>
+        <p class="text-secondary">Start by scripting a task, or explore your local vault.</p>
+    </div>
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="glass-card h-100" id="knowledge-section" onclick="showKnowledgeBase()">
+                <div class="card-icon mb-3"><i class="bi bi-database fs-2 text-warning"></i></div>
+                <div class="fw-bold text-uppercase">Knowledge Base</div>
+                <div class="small text-secondary">Browse {{ kb_files|length }} local documents</div>
+            </div>
+        </div>
+    
+    </div>
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="glass-card" onclick="document.getElementById('file-input').click()">
+                <i class="bi bi-camera fs-3 mb-2 text-success"></i>
+                <div class="fw-bold">Identify Herb</div>
+                <p class="small opacity-50 m-0">Scan and analyze specimens</p>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="chat-dock-wrapper position-fixed bottom-0 start-50 translate-middle-x mb-4 w-100 px-3"
+        style="max-width: 800px;">
+        <div class="chat-input-container p-2 bg-dark border border-secondary rounded-4 shadow-lg">
+            <div class="input-group">
+                <input type="text" id="ai-chat-input"
+                    class="form-control bg-transparent border-0 text-white shadow-none"
+                    placeholder="Message Herb-AI...">
+                <button class="btn btn-success rounded-3 px-3" id="send-btn">
+                    <i class="bi bi-arrow-up"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<style>
+    .glass-card {
+        background: #161616;
+        border: 1px solid #333;
+        border-radius: 20px;
+        padding: 25px;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+    .glass-card:hover {
+        border-color: #22c55e;
+        background: #1c1c1c;
+    }
+
+    .chat-input-container {
+        background: #1a1a1a !important;
+        border: 1px solid #444 !important;
+    }
+
+    #ai-chat-input::placeholder {
+        color: #666;
+    }
+</style>
+
+
+{% endblock %}

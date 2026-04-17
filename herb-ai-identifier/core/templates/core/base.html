@@ -1,0 +1,163 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HerbAI - Plant Identification</title>
+    <link rel="icon" type="image/x-icon" href="{% static 'icons/favicon.ico' %}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --bg: #0f0f0f;
+            --card-bg: #1a1a1a;
+            --accent: #22c55e;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: 
+                linear-gradient(180deg, rgba(7, 7, 7, 0.88), rgba(15, 15, 15, 0.92)),
+                radial-gradient(circle at top left, rgba(34, 197, 94, 0.16), transparent 24%),
+                radial-gradient(circle at bottom right, rgba(14, 165, 233, 0.12), transparent 22%),
+                url('{% static "core/images/default.png" %}') center center / cover no-repeat;
+            color: #fff;
+            font-family: 'Inter', sans-serif;
+            background-attachment: fixed;
+        }
+
+        /* The Sidebar from your image */
+
+        .sidebar {
+            width: 280px;
+            background: rgba(10, 10, 10, 0.95);
+            border-right: 1px solid #222;
+            height: 100vh;
+            padding: 24px 22px;
+        }
+
+        .sidebar-item {
+            padding: 14px;
+            border-radius: 12px;
+            color: #888;
+            transition: 0.3s;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .sidebar-item:hover {
+            background: #252525;
+            color: #fff;
+        }
+
+        .sidebar-item.active {
+            background: #252525;
+            color: #fff;
+            border: 1px solid #444;
+        }
+
+        .main-wrapper {
+            display: flex;
+            height: 100vh;
+        }
+
+        .content-area {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 40px;
+            position: relative;
+        }
+
+        /* The Glow Effect in the center of your screenshot */
+        .orb {
+            position: absolute;
+            top: 20%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 150px;
+            height: 150px;
+            background: var(--accent);
+            filter: blur(80px);
+            opacity: 0.3;
+            pointer-events: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="main-wrapper">
+        <aside class="sidebar d-none d-md-block">
+            <div class="sidebar-item active mb-4"><i class="bi bi-cpu"></i> Herb-AI Pro</div>
+
+            <div class="sidebar-item" onclick="window.location.href='{% url 'dashboard' %}'">
+                <i class="bi bi-grid-1x2"></i> Dashboard
+            </div>
+            <div class="sidebar-item" onclick=" window.location.href='{% url 'knowledge_base' %}'">
+                <i class="bi bi-database"></i> Knowledge Base
+            </div>
+
+        
+            <div class="sidebar-item" onclick="window.location.href='{% url 'chat' %}'">
+                <i class="bi bi-chat-dots"></i> AI Chat
+            </div>
+
+            <div class="sidebar-item" onclick="window.location.href='{% url 'library' %}'">
+                <i class="bi bi-journal-text"></i> Herbarium
+            </div>
+        
+            <hr class="border-secondary opacity-25 my-4">
+        
+            <div class="text-secondary small fw-bold mb-2 opacity-50 px-2 text-uppercase font-monospace">System Archives</div>
+            <div class="px-2">
+                <a href="{% url 'history' %}"
+                    class="history-btn d-flex align-items-center justify-content-between p-2 rounded-3 text-decoration-none transition-all mb-3">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-clock-history me-3 text-success fs-5"></i>
+                        <div>
+                            <div class="small fw-bold text-white text-uppercase">AI History</div>
+                            <div class="text-secondary" style="font-size: 10px;">// ACCESS_PAST_LOGS</div>
+                        </div>
+                    </div>
+                    <i class="bi bi-chevron-right text-secondary small"></i>
+                </a>
+            
+                <div class="kb-scroll px-1 opacity-50">
+                    <div class="small text-muted py-1" style="font-size: 11px;">
+                        <i class="bi bi-shield-check me-2"></i>DATABASE_ENCRYPTED
+                    </div>
+                </div>
+            </div>
+            
+            <style>
+                .history-btn {
+                    background: rgba(255, 255, 255, 0.03);
+                    border: 1px solid #333;
+                }
+            
+                .history-btn:hover {
+                    background: rgba(34, 197, 94, 0.08);
+                    border-color: #22c55e;
+                    transform: translateX(4px);
+                }
+            
+                .transition-all {
+                    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                }
+            </style>
+        </aside>
+
+        <main class="content-area">
+            <div class="orb"></div>
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

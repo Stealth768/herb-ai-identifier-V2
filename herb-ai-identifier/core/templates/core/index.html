@@ -1,0 +1,284 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="main-scroll p-4" style="background: linear-gradient(135deg, rgba(34,197,94,0.05) 0%, rgba(14,165,233,0.05) 100%);">
+    
+    <!-- Hero Section -->
+    <div class="hero-section mb-6" style="margin-bottom: 80px;">
+        <div style="max-width: 900px; margin: 0 auto; text-align: center;">
+            <div style="display: inline-block; background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.3); border-radius: 50px; padding: 12px 28px; margin-bottom: 20px;">
+                <span style="color: #22c55e; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px;">✨ Botanical Intelligence</span>
+            </div>
+            
+            <h1 style="font-size: 3.5rem; font-weight: 800; margin: 20px 0; line-height: 1.1; background: linear-gradient(135deg, #fff 0%, #888 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+                Discover Every Herb
+            </h1>
+            
+            <p style="font-size: 1.2rem; color: #bbb; margin-bottom: 30px; max-width: 600px; margin-left: auto; margin-right: auto; line-height: 1.6;">
+                Meet your intelligent botanical companion. Scan any herb, build your personal herbarium, and unlock plant wisdom with AI assistance.
+            </p>
+            
+            <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
+                <button class="btn btn-lg" id="scan-launch" style="background: #22c55e; color: #000; border: none; font-weight: 600; padding: 12px 40px; border-radius: 50px; font-size: 1rem; transition: all 0.3s;">
+                    <i class="bi bi-camera me-2"></i> Scan Your First Herb
+                </button>
+                <button class="btn btn-lg" onclick="window.location.href='{% url 'knowledge_base' %}'" style="background: transparent; color: #22c55e; border: 2px solid #22c55e; font-weight: 600; padding: 12px 40px; border-radius: 50px; font-size: 1rem; transition: all 0.3s;">
+                    <i class="bi bi-book me-2"></i> Explore Knowledge
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Section -->
+    <div class="row g-4 mb-6" style="margin-bottom: 80px; max-width: 1200px; margin-left: auto; margin-right: auto;">
+        <div class="col-md-4">
+            <div class="stat-card" style="background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.2); padding: 30px; border-radius: 20px; text-align: center;">
+                <div style="font-size: 2.5rem; font-weight: 800; color: #22c55e; margin-bottom: 10px;">50+</div>
+                <div style="color: #bbb; font-size: 0.95rem;">Herbs in Knowledge Base</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-card" style="background: rgba(14,165,233,0.1); border: 1px solid rgba(14,165,233,0.2); padding: 30px; border-radius: 20px; text-align: center;">
+                <div style="font-size: 2.5rem; font-weight: 800; color: #0ea5e9; margin-bottom: 10px;">98%</div>
+                <div style="color: #bbb; font-size: 0.95rem;">Identification Accuracy</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-card" style="background: rgba(168,85,247,0.1); border: 1px solid rgba(168,85,247,0.2); padding: 30px; border-radius: 20px; text-align: center;">
+                <div style="font-size: 2.5rem; font-weight: 800; color: #a855f7; margin-bottom: 10px;">AI</div>
+                <div style="color: #bbb; font-size: 0.95rem;">Powered by Gemini 2.0</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Features Grid -->
+    <div class="features-grid" style="max-width: 1200px; margin: 0 auto;">
+        <div class="row g-4 mb-6" style="margin-bottom: 80px;">
+            <!-- Feature 1: Herb Scanner -->
+            <div class="col-md-6">
+                <div class="feature-card" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; padding: 40px; height: 100%; cursor: pointer; transition: all 0.3s; position: relative; overflow: hidden;" id="btn-identify">
+                    <div style="position: absolute; top: -40px; right: -40px; width: 150px; height: 150px; background: rgba(34,197,94,0.2); border-radius: 50%; filter: blur(40px);"></div>
+                    
+                    <form id="scan-form" style="display:none;">
+                        {% csrf_token %}
+                        <input type="file" id="file-input" name="herb_image" accept="image/*">
+                    </form>
+                    
+                    <div style="position: relative; z-index: 2;">
+                        <div style="background: rgba(34,197,94,0.2); width: 70px; height: 70px; border-radius: 16px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; border: 2px solid rgba(34,197,94,0.4);">
+                            <i class="bi bi-scanner" style="font-size: 2rem; color: #22c55e;"></i>
+                        </div>
+                        
+                        <h3 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 12px; color: #fff;">
+                            Herb Scanner
+                        </h3>
+                        <p style="color: #999; font-size: 0.95rem; margin-bottom: 20px; line-height: 1.6;">
+                            Instantly identify herbs from photos using advanced AI. Point, snap, and discover botanical details within seconds.
+                        </p>
+                        
+                        <div style="display: flex; gap: 10px; align-items: center; color: #22c55e; font-size: 0.9rem; font-weight: 500;">
+                            <span>Start scanning</span>
+                            <i class="bi bi-arrow-right"></i>
+                        </div>
+                        
+                        <div class="progress mt-3 bg-dark d-none" id="mini-progress-container" style="height: 4px; background: #222 !important;">
+                            <div class="progress-bar bg-success" id="mini-progress-bar" style="width: 0%; background: #22c55e !important;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Feature 2: Personal Herbarium -->
+            <div class="col-md-6">
+                <div class="feature-card" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; padding: 40px; height: 100%; cursor: pointer; transition: all 0.3s; position: relative; overflow: hidden;" onclick="window.location.href='{% url 'library' %}'">
+                    <div style="position: absolute; top: -40px; right: -40px; width: 150px; height: 150px; background: rgba(14,165,233,0.2); border-radius: 50%; filter: blur(40px);"></div>
+                    
+                    <div style="position: relative; z-index: 2;">
+                        <div style="background: rgba(14,165,233,0.2); width: 70px; height: 70px; border-radius: 16px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; border: 2px solid rgba(14,165,233,0.4);">
+                            <i class="bi bi-journal-richtext" style="font-size: 2rem; color: #0ea5e9;"></i>
+                        </div>
+                        
+                        <h3 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 12px; color: #fff;">
+                            Personal Herbarium
+                        </h3>
+                        <p style="color: #999; font-size: 0.95rem; margin-bottom: 20px; line-height: 1.6;">
+                            Build and maintain your own botanical collection. Store specimens, notes, and images in one beautiful, organized place.
+                        </p>
+                        
+                        <div style="display: flex; gap: 10px; align-items: center; color: #0ea5e9; font-size: 0.9rem; font-weight: 500;">
+                            <span>View herbarium</span>
+                            <i class="bi bi-arrow-right"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Feature 3: AI Assistant -->
+        <div class="row g-4 mb-6" style="margin-bottom: 80px;">
+            <div class="col-md-6">
+                <div class="feature-card" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; padding: 40px; height: 100%; cursor: pointer; transition: all 0.3s; position: relative; overflow: hidden;" onclick="window.location.href='{% url 'chat' %}'">
+                    <div style="position: absolute; top: -40px; right: -40px; width: 150px; height: 150px; background: rgba(168,85,247,0.2); border-radius: 50%; filter: blur(40px);"></div>
+                    
+                    <div style="position: relative; z-index: 2;">
+                        <div style="background: rgba(168,85,247,0.2); width: 70px; height: 70px; border-radius: 16px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; border: 2px solid rgba(168,85,247,0.4);">
+                            <i class="bi bi-chat-dots" style="font-size: 2rem; color: #a855f7;"></i>
+                        </div>
+                        
+                        <h3 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 12px; color: #fff;">
+                            AI Chat Assistant
+                        </h3>
+                        <p style="color: #999; font-size: 0.95rem; margin-bottom: 20px; line-height: 1.6;">
+                            Chat with our intelligent botanical expert. Get answers about herb properties, uses, cultivation tips, and more.
+                        </p>
+                        
+                        <div style="display: flex; gap: 10px; align-items: center; color: #a855f7; font-size: 0.9rem; font-weight: 500;">
+                            <span>Open chat</span>
+                            <i class="bi bi-arrow-right"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Feature 4: Knowledge Base -->
+            <div class="col-md-6">
+                <div class="feature-card" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; padding: 40px; height: 100%; cursor: pointer; transition: all 0.3s; position: relative; overflow: hidden;" onclick="window.location.href='{% url 'knowledge_base' %}'">
+                    <div style="position: absolute; top: -40px; right: -40px; width: 150px; height: 150px; background: rgba(251,146,60,0.2); border-radius: 50%; filter: blur(40px);"></div>
+                    
+                    <div style="position: relative; z-index: 2;">
+                        <div style="background: rgba(251,146,60,0.2); width: 70px; height: 70px; border-radius: 16px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; border: 2px solid rgba(251,146,60,0.4);">
+                            <i class="bi bi-book" style="font-size: 2rem; color: #fb923c;"></i>
+                        </div>
+                        
+                        <h3 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 12px; color: #fff;">
+                            Knowledge Vault
+                        </h3>
+                        <p style="color: #999; font-size: 0.95rem; margin-bottom: 20px; line-height: 1.6;">
+                            Explore our comprehensive database of herbs with detailed information, uses, and traditional applications.
+                        </p>
+                        
+                        <div style="display: flex; gap: 10px; align-items: center; color: #fb923c; font-size: 0.9rem; font-weight: 500;">
+                            <span>Explore vault</span>
+                            <i class="bi bi-arrow-right"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Feature 5: History -->
+        <div class="row g-4">
+            <div class="col-md-12">
+                <div class="feature-card" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; padding: 40px; cursor: pointer; transition: all 0.3s; position: relative; overflow: hidden;" onclick="window.location.href='{% url 'history' %}'">
+                    <div style="position: absolute; top: -40px; right: -40px; width: 150px; height: 150px; background: rgba(244,63,94,0.2); border-radius: 50%; filter: blur(40px);"></div>
+                    
+                    <div style="position: relative; z-index: 2;">
+                        <div style="display: flex; align-items: center; gap: 20px;">
+                            <div style="background: rgba(244,63,94,0.2); width: 70px; height: 70px; border-radius: 16px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; border: 2px solid rgba(244,63,94,0.4);">
+                                <i class="bi bi-clock-history" style="font-size: 2rem; color: #f43f5e;"></i>
+                            </div>
+                            
+                            <div style="flex-grow: 1;">
+                                <h3 style="font-size: 1.3rem; font-weight: 700; margin-bottom: 8px; color: #fff;">
+                                    Scan History
+                                </h3>
+                                <p style="color: #999; font-size: 0.95rem; margin: 0; line-height: 1.6;">
+                                    Keep track of all your previous herb identifications and scans. Review detailed analysis, images, and notes.
+                                </p>
+                            </div>
+                            
+                            <div style="color: #f43f5e; font-size: 1.5rem;">
+                                <i class="bi bi-arrow-right"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CTA Section -->
+    <div style="margin-top: 100px; padding: 60px; background: linear-gradient(135deg, rgba(34,197,94,0.15) 0%, rgba(14,165,233,0.15) 100%); border-radius: 24px; border: 1px solid rgba(34,197,94,0.2); text-align: center; max-width: 900px; margin-left: auto; margin-right: auto;">
+        <h2 style="font-size: 2rem; font-weight: 700; margin-bottom: 15px; color: #fff;">Ready to explore the world of herbs?</h2>
+        <p style="color: #bbb; margin-bottom: 30px; font-size: 1rem;">Start by scanning your first herb or browse our knowledge base to discover fascinating botanical information.</p>
+        <button class="btn btn-lg" id="scan-launch-cta" style="background: #22c55e; color: #000; border: none; font-weight: 600; padding: 15px 50px; border-radius: 50px; font-size: 1rem; transition: all 0.3s;">
+            <i class="bi bi-camera me-2"></i> Scan Now
+        </button>
+    </div>
+</div>
+
+<style>
+    .feature-card {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .feature-card:hover {
+        transform: translateY(-8px);
+        border-color: rgba(255,255,255,0.2) !important;
+        background: rgba(255,255,255,0.05) !important;
+    }
+
+    .stat-card {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .stat-card:hover {
+        transform: translateY(-4px);
+    }
+
+    #btn-identify:hover {
+        transform: translateY(-8px);
+        border-color: rgba(34,197,94,0.4) !important;
+        background: rgba(34,197,94,0.08) !important;
+    }
+</style>
+
+<script>
+    const fileInput = document.getElementById('file-input');
+    const btnIdentify = document.getElementById('btn-identify');
+    const scanLaunch = document.getElementById('scan-launch');
+    const scanLaunchCta = document.getElementById('scan-launch-cta');
+    const miniProgress = document.getElementById('mini-progress-container');
+    const miniBar = document.getElementById('mini-progress-bar');
+
+    const openScan = () => fileInput.click();
+    btnIdentify.onclick = openScan;
+    scanLaunch.onclick = openScan;
+    scanLaunchCta.onclick = openScan;
+
+    fileInput.onchange = async () => {
+        const file = fileInput.files[0];
+        if (!file) return;
+
+        miniProgress.classList.remove('d-none');
+        miniBar.style.width = '30%';
+
+        const formData = new FormData();
+        formData.append('herb_image', file);
+        formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+
+        try {
+            const response = await fetch('{% url 'scan_herb' %}', {
+                method: 'POST',
+                body: formData
+            });
+
+            const result = await response.json();
+            miniBar.style.width = '100%';
+
+            if (result.success) {
+                setTimeout(() => {
+                    window.location.href = `{% url 'analyzer' %}?id=${result.data.id}`;
+                }, 700);
+            } else {
+                miniProgress.classList.add('d-none');
+                alert(result.error || result.message || 'Scan failed.');
+            }
+        } catch (err) {
+            miniProgress.classList.add('d-none');
+            alert('Scan error: ' + err.message);
+        }
+    };
+</script>
+{% endblock %}

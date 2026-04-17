@@ -1,0 +1,134 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="main-container">
+    {% if not name or name == "Unknown" %}
+    <div class="analyzer-empty text-center py-5">
+        <div class="cyber-icon mb-4"><i class="bi bi-exclamation-triangle fs-1 text-warning"></i></div>
+        <h2 class="cyber-text text-uppercase">[ NO SPECIMEN DATA IN BUFFER ]</h2>
+        <p class="text-secondary">Run a scan in the Scanner tab to populate this digital twin.</p>
+        <a href="{% url 'dashboard' %}" class="btn btn-outline-success mt-3">
+            <i class="bi bi-cpu"></i> INITIALIZE SCANNER
+        </a>
+    </div>
+
+    {% else %}
+    <div class="analyzer-container animate__animated animate__fadeIn">
+
+        <div class="specimen-header d-flex justify-content-between align-items-end mb-4">
+            <div>
+                <p class="small text-success mb-0 font-monospace">// AI IDENTIFICATION CONFIRMED</p>
+                <h1 class="plant-name display-4 text-uppercase fw-bold m-0"
+                    style="text-shadow: 0 0 15px rgba(74, 222, 128, 0.5);">
+                    {{ name }}
+                </h1>
+            </div>
+            <div class="text-end">
+                <span class="badge bg-success px-3 py-2">
+                    <i class="bi bi-shield-check"></i> VERIFIED SPECIMEN
+                </span>
+            </div>
+        </div>
+
+        <div class="score-display mb-5">
+            <div class="d-flex justify-content-between mb-1">
+                <span class="score-label small text-secondary font-monospace">SIMILARITY_INDEX</span>
+                <span class="score-value text-success fw-bold">{{ score }}%</span>
+            </div>
+            <div class="progress bg-dark" style="height: 10px; border: 1px solid #222; overflow: visible;">
+                <div class="progress-bar bg-success" id="dynamic-progress-bar" role="progressbar" aria-valuenow="0"
+                    aria-valuemin="0" aria-valuemax="100">
+                </div>
+            </div>
+                </div>
+                
+                <style>
+                    #dynamic-glow-bar {
+                        
+                        box-shadow: 0 0 15px rgba(74, 222, 128, 0.6);
+                        transition: width 1.5s ease-in-out;
+                    }
+                </style>
+            </div>
+        </div>
+
+        <div class="row g-4 mb-5">
+            <div class="col-md-5">
+                <div class="matrix-cell p-3 h-100"
+                    style="background: #050505; border: 1px solid #1a1a1a; border-radius: 20px;">
+                    <p class="cell-label small text-secondary mb-3 font-monospace">[ LIVE_SPECIMEN_INPUT ]</p>
+                    <div class="img-wrapper overflow-hidden rounded-3" style="aspect-ratio: 1/1; background: #111;">
+                        {% if latest.user_image %}
+                        <img src="{{ latest.user_image.url }}" alt="Your upload" class="w-100 h-100 object-fit-cover">
+                        {% else %}
+                        <div class="h-100 d-flex align-items-center justify-content-center text-secondary italic">
+                            <i class="bi bi-camera fs-1"></i>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-2 d-flex flex-column align-items-center justify-content-center">
+                <div class="divider-line bg-secondary opacity-25" style="width: 1px; height: 50px;"></div>
+                <div class="divider-icon my-3 text-secondary fs-4">⟷</div>
+                <div class="divider-label fw-bold text-secondary font-monospace">VS</div>
+                <div class="divider-line bg-secondary opacity-25" style="width: 1px; height: 50px;"></div>
+            </div>
+
+            <div class="col-md-5">
+                <div class="matrix-cell p-3 h-100"
+                    style="background: #050505; border: 1px solid #064e3b; border-radius: 20px;">
+                    <p class="cell-label small text-success mb-3 font-monospace">[ KNOWLEDGE_BASE_TWIN ]</p>
+                    <div class="img-wrapper overflow-hidden rounded-3" style="aspect-ratio: 1/1; background: #000;">
+                        {% if latest.matched_image_url %}
+                        <img src="{{ latest.matched_image_url }}" alt="Reference plant image" class="w-100 h-100 object-fit-cover">
+                        {% else %}
+                        <div class="h-100 d-flex flex-column align-items-center justify-content-center text-success">
+                            <i class="bi bi-intersect fs-1 mb-2"></i>
+                            <span class="small font-monospace">MATCHED_REFERENCE_ID: 0x{{ name|slice:":2"|upper }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="intelligence-box p-4 rounded-4 mb-5"
+            style="background: linear-gradient(145deg, #0a0a0a, #050505); border: 1px solid #1a1a1a;">
+            <h5 class="text-success small font-monospace mb-3"><i class="bi bi-info-circle"></i>
+                AI_IDENTIFICATION_REPORT</h5>
+            <p class="text-light-emphasis leading-relaxed" style="font-size: 1.1rem; line-height: 1.6;">
+                {{ details }}
+            </p>
+        </div>
+
+        <div class="analyzer-nav d-flex gap-3 justify-content-center">
+            <a href="{% url 'dashboard' %}" class="btn btn-dark px-4 py-2 border-secondary">
+                <i class="bi bi-arrow-left"></i> NEW_SCAN
+            </a>
+            <a href="{% url 'library' %}" class="btn btn-success px-4 py-2 text-dark fw-bold">
+                VIEW_HERBARIUM <i class="bi bi-arrow-right"></i>
+            </a>
+        </div>
+
+    </div>
+    {% endif %}
+</div>
+
+<style>
+    .plant-name {
+        letter-spacing: -1px;
+    }
+
+    .matrix-cell:hover {
+        border-color: #4ade80 !important;
+        transition: 0.3s;
+    }
+
+    .progress-bar {
+        transition: width 1.5s cubic-bezier(0.1, 0, 0.3, 1);
+    }
+</style>
+{% endblock %}

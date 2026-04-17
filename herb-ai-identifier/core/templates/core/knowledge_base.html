@@ -1,0 +1,112 @@
+{% extends 'core/base.html' %}
+{% block content %}
+<div class="container-fluid p-4">
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="glass-card h-100 d-flex flex-column" style="max-height: 80vh;">
+                <h4 class="fw-bold text-uppercase mb-3 small tracking-widest text-success">
+                    <i class="bi bi-folder2-open me-2"></i>Knowledge Vault
+                </h4>
+
+                <form action="." method="GET" class="mb-4">
+                    <div class="input-group">
+                        <span class="input-group-text bg-transparent border-secondary border-end-0">
+                            <i class="bi bi-search text-secondary"></i>
+                        </span>
+                        <input type="text" name="q"
+                            class="form-control bg-transparent border-secondary border-start-0 text-white shadow-none"
+                            placeholder="Filter documents..." value="{{ query }}">
+                    </div>
+                </form>
+
+                <div class="file-list overflow-auto flex-grow-1">
+                    {% for f in files %}
+                    <a href="?file={{ f }}{% if query %}&q={{ query }}{% endif %}"
+                        class="text-decoration-none d-block p-3 mb-2 rounded-3 file-item {% if selected_file == f %}active-file{% endif %}">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-file-earmark-text me-3 fs-5"></i>
+                            <div>
+                                <div class="fw-bold text-white small text-uppercase">{{ f|slice:":-4" }}</div>
+                                <div class="text-secondary small">.TXT Document</div>
+                            </div>
+                        </div>
+                    </a>
+                    {% empty %}
+                    <p class="text-center text-muted mt-5 small">// NO MATCHES FOUND</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <div class="glass-card h-100" style="min-height: 60vh;">
+                {% if selected_file %}
+                <div class="d-flex justify-content-between align-items-start mb-4 border-bottom border-secondary pb-3">
+                    <h2 class="h4 fw-bold text-uppercase m-0">{{ selected_file|slice:":-4" }}</h2>
+                    <span class="badge bg-dark border border-secondary text-success font-monospace">SOURCE:
+                        LOCAL_VAULT</span>
+                </div>
+                <div class="content-reader font-monospace text-secondary"
+                    style="white-space: pre-wrap; line-height: 1.6;">
+                    {{ file_content }}
+                </div>
+                {% else %}
+                <div class="h-100 d-flex flex-column align-items-center justify-content-center text-center opacity-50">
+                    <i class="bi bi-layout-text-sidebar-reverse display-1 mb-3"></i>
+                    <h4 class="font-monospace text-uppercase">Select a record to analyze</h4>
+                    <p class="small">Cross-referencing {{ total_docs }} local files</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .glass-card {
+        background: #161616;
+        border: 1px solid #333;
+        border-radius: 24px;
+        padding: 30px;
+    }
+
+    .file-item {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid transparent;
+        transition: 0.3s;
+    }
+
+    .file-item:hover {
+        background: rgba(34, 197, 94, 0.05);
+        border-color: #22c55e;
+    }
+
+    .active-file {
+        background: rgba(34, 197, 94, 0.1) !important;
+        border-color: #22c55e !important;
+    }
+
+    .file-item i {
+        color: #888;
+        transition: 0.3s;
+    }
+
+    .file-item:hover i {
+        color: #22c55e;
+    }
+
+    .content-reader {
+        font-size: 0.95rem;
+    }
+
+    /* Custom Scrollbar for the list */
+    .file-list::-webkit-scrollbar {
+        width: 4px;
+    }
+
+    .file-list::-webkit-scrollbar-thumb {
+        background: #333;
+        border-radius: 10px;
+    }
+</style>
+{% endblock %}
